@@ -78,9 +78,7 @@ class IssueDetailModal(ModalScreen):
     }
     """
 
-    def __init__(
-        self, issue: Issue, base_url: str, **kwargs
-    ) -> None:
+    def __init__(self, issue: Issue, base_url: str, **kwargs) -> None:
         """Initialize the issue detail modal.
 
         Args:
@@ -98,31 +96,32 @@ class IssueDetailModal(ModalScreen):
             # Header
             with Container(classes="detail-header"):
                 icon = get_issue_icon(self.issue.issue_type.name)
-                yield Label(
-                    f"{icon} {self.issue.key}: {self.issue.summary}"
-                )
+                yield Label(f"{icon} {self.issue.key}: {self.issue.summary}")
 
             # Main content area (split panel)
             with Horizontal(classes="detail-content"):
                 # Left panel: description
                 with Container(classes="detail-main"):
                     yield Label("Description", classes="field-label")
-                    with VerticalScroll(
-                        classes="description-scroll"
-                    ):
+                    with VerticalScroll(classes="description-scroll"):
                         desc = self.issue.description or "No description"
                         yield Static(desc)
 
                 # Right panel: metadata
                 with Container(classes="detail-sidebar"):
                     yield Label("Type", classes="field-label")
-                    yield Label(self.issue.issue_type.name, classes="field-value")
-                    
+                    yield Label(
+                        self.issue.issue_type.name, classes="field-value"
+                    )
+
                     yield Label("Status", classes="field-label")
                     yield Label(self.issue.status, classes="field-value")
-                    
+
                     yield Label("Assignee", classes="field-label")
-                    yield Label(format_assignee(self.issue.assignee), classes="field-value")
+                    yield Label(
+                        format_assignee(self.issue.assignee),
+                        classes="field-value",
+                    )
 
                     if self.issue.priority:
                         yield Label("Priority", classes="field-label")
@@ -130,15 +129,23 @@ class IssueDetailModal(ModalScreen):
 
                     if self.issue.fix_versions:
                         yield Label("Fix Versions", classes="field-label")
-                        yield Label(", ".join(self.issue.fix_versions), classes="field-value")
+                        yield Label(
+                            ", ".join(self.issue.fix_versions),
+                            classes="field-value",
+                        )
 
                     if self.issue.labels:
                         yield Label("Labels", classes="field-label")
-                        yield Label(", ".join(self.issue.labels), classes="field-value")
+                        yield Label(
+                            ", ".join(self.issue.labels), classes="field-value"
+                        )
 
                     if self.issue.components:
                         yield Label("Components", classes="field-label")
-                        yield Label(", ".join(self.issue.components), classes="field-value")
+                        yield Label(
+                            ", ".join(self.issue.components),
+                            classes="field-value",
+                        )
 
             # Button bar
             with Horizontal(classes="button-bar"):

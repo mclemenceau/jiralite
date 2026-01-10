@@ -51,7 +51,9 @@ class IssueListItem(ListItem):
         if self._label is not None and self.size.width > 0:
             max_width = max(80, self.size.width)
             line = format_issue_line(
-                self.issue, show_assignee=self.show_assignee, max_width=max_width
+                self.issue,
+                show_assignee=self.show_assignee,
+                max_width=max_width,
             )
             self._label.update(line)
 
@@ -177,9 +179,7 @@ class IssueListScreen(Screen):
 
         # Then populate it with items
         for issue in self.issues:
-            list_view.append(
-                IssueListItem(issue, show_assignee=show_assignee)
-            )
+            list_view.append(IssueListItem(issue, show_assignee=show_assignee))
 
         list_view.focus()
 
@@ -191,7 +191,7 @@ class IssueListScreen(Screen):
         """
         # Log to console for easy copying
         logger.error(f"Error displayed to user: {message}")
-        
+
         container = self.query_one(Container)
         container.remove_children()
         container.mount(Label(f"Error: {message}", classes="error"))
@@ -216,9 +216,7 @@ class IssueListScreen(Screen):
     def show_issue_detail(self, event: ListView.Selected) -> None:
         """Show issue detail modal when item is selected."""
         if isinstance(event.item, IssueListItem):
-            modal = IssueDetailModal(
-                event.item.issue, self.config.base_url
-            )
+            modal = IssueDetailModal(event.item.issue, self.config.base_url)
             self.app.push_screen(modal)
 
     def action_quit(self) -> None:
@@ -264,29 +262,22 @@ class IssueListScreen(Screen):
                 if not transitions:
                     self.notify(
                         f"No transitions available for {issue.key}",
-                        severity="warning"
+                        severity="warning",
                     )
                     return
 
-                def handle_transition(
-                    result: tuple[str, str] | None
-                ) -> None:
+                def handle_transition(result: tuple[str, str] | None) -> None:
                     if result:
                         transition_id, comment = result
-                        self.submit_transition(
-                            issue, transition_id, comment
-                        )
+                        self.submit_transition(issue, transition_id, comment)
 
                 self.app.push_screen(
-                    TransitionModal(issue, transitions),
-                    handle_transition
+                    TransitionModal(issue, transitions), handle_transition
                 )
 
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"
-            logger.exception(
-                f"Failed to load transitions: {error_msg}"
-            )
+            logger.exception(f"Failed to load transitions: {error_msg}")
             self.notify(f"Error: {error_msg}", severity="error")
 
     @work(exclusive=True)
@@ -302,23 +293,17 @@ class IssueListScreen(Screen):
         """
         try:
             async with JiraClient(self.config) as client:
-                await client.transition_issue(
-                    issue.key, transition_id, comment
-                )
+                await client.transition_issue(issue.key, transition_id, comment)
                 self.notify(f"Status changed for {issue.key}")
                 # Refresh to show updated status
                 self.load_issues()
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"
-            logger.exception(
-                f"Failed to transition issue: {error_msg}"
-            )
+            logger.exception(f"Failed to transition issue: {error_msg}")
             self.notify(f"Error: {error_msg}", severity="error")
 
     @work(exclusive=True)
-    async def submit_comment(
-        self, issue: Issue, comment_text: str
-    ) -> None:
+    async def submit_comment(self, issue: Issue, comment_text: str) -> None:
         """Submit comment to Jira.
 
         Args:

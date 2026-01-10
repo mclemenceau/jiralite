@@ -4,7 +4,6 @@ from typing import Optional
 
 from jiralite.domain.models import Issue, User
 
-
 # Default issue type icon mapping
 ISSUE_TYPE_ICONS = {
     "objective": "🟨",
@@ -47,11 +46,11 @@ def format_issue_line(
     # Fixed column widths for alignment
     key_width = 12
     status_width = 15
-    
+
     # Format key and status with padding
     key_col = f"{issue.key:<{key_width}}"
     status_col = f"{issue.status:<{status_width}}"
-    
+
     # Build assignee text
     assignee_text = ""
     if show_assignee and issue.assignee:

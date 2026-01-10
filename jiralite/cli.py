@@ -116,7 +116,7 @@ def build_jql_from_args(
     if args.project:
         return (
             f"project = {args.project} AND "
-            f"((assignee IN (currentUser()) AND statusCategory IN (\"To Do\",\"In Progress\")) OR "
+            f'((assignee IN (currentUser()) AND statusCategory IN ("To Do","In Progress")) OR '
             f"(assignee IN (currentUser()) AND statusCategory IN (Done) AND resolved >= -{default_days}d)) "
             f"ORDER BY updated DESC"
         )
@@ -151,9 +151,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         # Parse additional fields
         additional_fields = []
         if args.fields:
-            additional_fields = [
-                f.strip() for f in args.fields.split(",")
-            ]
+            additional_fields = [f.strip() for f in args.fields.split(",")]
 
         # Run the TUI
         app = JiraLiteApp(

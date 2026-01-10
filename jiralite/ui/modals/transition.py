@@ -23,9 +23,7 @@ class TransitionListItem(ListItem):
 
     def compose(self) -> ComposeResult:
         """Compose the list item."""
-        yield Label(
-            f"{self.transition.name} → {self.transition.to_status}"
-        )
+        yield Label(f"{self.transition.name} → {self.transition.to_status}")
 
 
 class TransitionModal(ModalScreen[tuple[str, str] | None]):
@@ -96,11 +94,8 @@ class TransitionModal(ModalScreen[tuple[str, str] | None]):
             )
             yield Label("Select new status:")
             yield ListView(
-                *[
-                    TransitionListItem(t)
-                    for t in self.transitions
-                ],
-                id="transition_list"
+                *[TransitionListItem(t) for t in self.transitions],
+                id="transition_list",
             )
             yield Label("Comment (required):")
             yield TextArea(id="comment_text")
@@ -109,9 +104,7 @@ class TransitionModal(ModalScreen[tuple[str, str] | None]):
                 yield Button("Cancel", id="cancel")
 
     @on(ListView.Selected, "#transition_list")
-    def transition_selected(
-        self, event: ListView.Selected
-    ) -> None:
+    def transition_selected(self, event: ListView.Selected) -> None:
         """Handle transition selection."""
         if isinstance(event.item, TransitionListItem):
             self.selected_transition = event.item.transition

@@ -97,17 +97,11 @@ def load_config() -> JiraConfig:
     api_token = jira_config.get("api_token", "")
 
     if not base_url:
-        raise ConfigurationError(
-            "Missing 'base_url' in [jira] section"
-        )
+        raise ConfigurationError("Missing 'base_url' in [jira] section")
     if not email:
-        raise AuthenticationError(
-            "Missing 'email' in [jira] section"
-        )
+        raise AuthenticationError("Missing 'email' in [jira] section")
     if not api_token:
-        raise AuthenticationError(
-            "Missing 'api_token' in [jira] section"
-        )
+        raise AuthenticationError("Missing 'api_token' in [jira] section")
 
     # Optional fields
     default_jql_days = jira_config.get("default_jql_days", 14)

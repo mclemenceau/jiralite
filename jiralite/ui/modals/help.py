@@ -67,9 +67,7 @@ class HelpModal(ModalScreen):
             yield Label("JiraLite — Keyboard Shortcuts")
             with VerticalScroll():
                 yield Markdown(self.HELP_TEXT)
-            yield Label(
-                "Press any key to close", classes="dim"
-            )
+            yield Label("Press any key to close", classes="dim")
 
     def on_key(self, event) -> None:
         """Close modal on any key press."""

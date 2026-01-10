@@ -71,9 +71,7 @@ class JiraClient:
                 "Authentication failed. Check email and API token."
             )
         elif response.status_code == 404:
-            raise IssueNotFoundError(
-                "Issue not found", status_code=404
-            )
+            raise IssueNotFoundError("Issue not found", status_code=404)
         else:
             try:
                 error_data = response.json()
@@ -194,9 +192,7 @@ class JiraClient:
         Raises:
             JiraAPIError: If the API call fails
         """
-        response = await self._client.get(
-            f"/rest/api/3/issue/{key}/comment"
-        )
+        response = await self._client.get(f"/rest/api/3/issue/{key}/comment")
 
         if response.status_code != 200:
             self._handle_error(response)
@@ -229,16 +225,11 @@ class JiraClient:
             "content": [
                 {
                     "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": body
-                        }
-                    ]
+                    "content": [{"type": "text", "text": body}],
                 }
-            ]
+            ],
         }
-        
+
         payload = {"body": adf_body}
 
         response = await self._client.post(
@@ -306,18 +297,11 @@ class JiraClient:
                 "content": [
                     {
                         "type": "paragraph",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": comment
-                            }
-                        ]
+                        "content": [{"type": "text", "text": comment}],
                     }
-                ]
+                ],
             }
-            payload["update"] = {
-                "comment": [{"add": {"body": adf_comment}}]
-            }
+            payload["update"] = {"comment": [{"add": {"body": adf_comment}}]}
 
         response = await self._client.post(
             f"/rest/api/3/issue/{key}/transitions", json=payload
@@ -373,9 +357,7 @@ class JiraClient:
 
         try:
             # Jira uses format: 2024-01-10T12:34:56.789+0000
-            return datetime.fromisoformat(
-                value.replace("Z", "+00:00")
-            )
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
         except Exception:
             return None
 
@@ -390,44 +372,44 @@ class JiraClient:
         """
         if adf is None:
             return None
-        
+
         # Handle plain strings (from older API versions)
         if isinstance(adf, str):
             return adf
-        
+
         # Handle ADF dict
         if not isinstance(adf, dict):
             return None
-        
+
         # Recursively extract text from ADF nodes
         text_parts = []
-        
+
         def extract_node(node):
             """Recursively extract text from ADF node."""
             if isinstance(node, dict):
                 # Text nodes have a 'text' field
-                if 'text' in node:
-                    text_parts.append(node['text'])
-                
+                if "text" in node:
+                    text_parts.append(node["text"])
+
                 # Process child content
-                if 'content' in node:
-                    for child in node['content']:
+                if "content" in node:
+                    for child in node["content"]:
                         extract_node(child)
-                        
+
                 # Add line breaks for paragraphs and hard breaks
-                node_type = node.get('type', '')
-                if node_type == 'paragraph' and text_parts:
-                    text_parts.append('\n')
-                elif node_type == 'hardBreak':
-                    text_parts.append('\n')
+                node_type = node.get("type", "")
+                if node_type == "paragraph" and text_parts:
+                    text_parts.append("\n")
+                elif node_type == "hardBreak":
+                    text_parts.append("\n")
             elif isinstance(node, list):
                 for item in node:
                     extract_node(item)
-        
+
         extract_node(adf)
-        
+
         # Join and clean up text
-        text = ''.join(text_parts).strip()
+        text = "".join(text_parts).strip()
         return text if text else None
 
     def _parse_issue(self, data: dict) -> Issue:
@@ -445,27 +427,19 @@ class JiraClient:
         labels = tuple(fields.get("labels", []))
 
         # Parse fix versions
-        fix_versions = tuple(
-            v["name"] for v in fields.get("fixVersions", [])
-        )
+        fix_versions = tuple(v["name"] for v in fields.get("fixVersions", []))
 
         # Parse components
-        components = tuple(
-            c["name"] for c in fields.get("components", [])
-        )
+        components = tuple(c["name"] for c in fields.get("components", []))
 
         return Issue(
             key=data.get("key", ""),
             summary=fields.get("summary", ""),
-            issue_type=self._parse_issue_type(
-                fields.get("issuetype", {})
-            ),
+            issue_type=self._parse_issue_type(fields.get("issuetype", {})),
             status=fields.get("status", {}).get("name", "Unknown"),
             assignee=self._parse_user(fields.get("assignee")),
             reporter=self._parse_user(fields.get("reporter")),
-            description=self._extract_text_from_adf(
-                fields.get("description")
-            ),
+            description=self._extract_text_from_adf(fields.get("description")),
             priority=fields.get("priority", {}).get("name"),
             labels=labels,
             fix_versions=fix_versions,
@@ -487,12 +461,9 @@ class JiraClient:
 
         return Comment(
             id=data.get("id", ""),
-            author=author or User(
-                account_id="", display_name="Unknown"
-            ),
+            author=author or User(account_id="", display_name="Unknown"),
             body=self._extract_text_from_adf(data.get("body")) or "",
-            created=self._parse_datetime(data.get("created"))
-            or datetime.now(),
+            created=self._parse_datetime(data.get("created")) or datetime.now(),
             updated=self._parse_datetime(data.get("updated")),
         )
 
@@ -507,7 +478,7 @@ def build_default_jql(days: int = 14) -> str:
         JQL query string
     """
     return (
-        f"(assignee IN (currentUser()) AND statusCategory IN (\"To Do\",\"In Progress\")) OR "
+        f'(assignee IN (currentUser()) AND statusCategory IN ("To Do","In Progress")) OR '
         f"(assignee IN (currentUser()) AND statusCategory IN (Done) AND resolved >= -{days}d) "
         f"ORDER BY updated DESC"
     )

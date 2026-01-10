@@ -35,7 +35,21 @@ JiraLite is a terminal user interface (TUI) for Jira that provides:
 ```bash
 git clone https://github.com/yourusername/jiralite.git
 cd jiralite
+
+# Create and activate virtual environment
+python -m venv venv
+
+# Activate (bash)
+source venv/bin/activate
+
+# Or activate (fish)
+source venv/bin/activate.fish
+
+# Install
 pip install -e ".[dev]"
+
+# Run
+jiralite
 ```
 
 ## Configuration

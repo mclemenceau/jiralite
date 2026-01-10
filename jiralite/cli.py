@@ -111,7 +111,7 @@ def build_jql_from_args(
         JQL query string
     """
     if args.jql:
-        return args.jql
+        return str(args.jql)
 
     if args.project:
         return (

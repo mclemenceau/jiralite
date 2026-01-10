@@ -1,6 +1,7 @@
 """Issue detail modal screen for JiraLite."""
 
 import webbrowser
+from typing import Any
 
 from textual import on
 from textual.app import ComposeResult
@@ -78,7 +79,7 @@ class IssueDetailModal(ModalScreen):
     }
     """
 
-    def __init__(self, issue: Issue, base_url: str, **kwargs) -> None:
+    def __init__(self, issue: Issue, base_url: str, **kwargs: Any) -> None:
         """Initialize the issue detail modal.
 
         Args:
@@ -163,7 +164,7 @@ class IssueDetailModal(ModalScreen):
         url = f"{self.base_url}/browse/{self.issue.key}"
         webbrowser.open(url)
 
-    def on_key(self, event) -> None:
+    def on_key(self, event: Any) -> None:
         """Handle keyboard shortcuts."""
         if event.key == "escape":
             self.app.pop_screen()

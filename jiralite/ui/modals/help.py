@@ -1,5 +1,7 @@
 """Help modal screen for JiraLite."""
 
+from typing import Any
+
 from textual.app import ComposeResult
 from textual.containers import Container, VerticalScroll
 from textual.screen import ModalScreen
@@ -69,6 +71,6 @@ class HelpModal(ModalScreen):
                 yield Markdown(self.HELP_TEXT)
             yield Label("Press any key to close", classes="dim")
 
-    def on_key(self, event) -> None:
+    def on_key(self, event: Any) -> None:
         """Close modal on any key press."""
         self.app.pop_screen()

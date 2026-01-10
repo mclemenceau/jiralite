@@ -1,6 +1,7 @@
 """Main issue list screen for JiraLite."""
 
 import webbrowser
+from typing import Any, Optional
 
 from textual import on, work
 from textual.app import ComposeResult
@@ -106,8 +107,8 @@ class IssueListScreen(Screen):
         self,
         config: JiraConfig,
         jql: str,
-        additional_fields: list[str] = None,
-        **kwargs,
+        additional_fields: Optional[list[str]] = None,
+        **kwargs: Any,
     ) -> None:
         """Initialize the issue list screen.
 

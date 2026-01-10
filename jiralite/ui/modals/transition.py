@@ -1,5 +1,7 @@
 """Transition modal screen for JiraLite."""
 
+from typing import Any
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -71,7 +73,10 @@ class TransitionModal(ModalScreen[tuple[str, str] | None]):
     """
 
     def __init__(
-        self, issue: Issue, transitions: list[Transition], **kwargs
+        self,
+        issue: Issue,
+        transitions: list[Transition],
+        **kwargs: Any,
     ) -> None:
         """Initialize the transition modal.
 

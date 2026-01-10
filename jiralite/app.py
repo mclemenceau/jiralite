@@ -1,6 +1,7 @@
 """Main JiraLite application."""
 
 import sys
+from typing import Any, Optional
 
 from textual.app import App
 
@@ -27,8 +28,8 @@ class JiraLiteApp(App):
         self,
         config: JiraConfig,
         jql: str,
-        additional_fields: list[str] = None,
-        **kwargs,
+        additional_fields: Optional[list[str]] = None,
+        **kwargs: Any,
     ) -> None:
         """Initialize the application.
 
@@ -52,7 +53,7 @@ class JiraLiteApp(App):
         )
         self.push_screen(screen)
 
-    def on_exception(self, event) -> None:
+    def on_exception(self, event: Any) -> None:
         """Handle unhandled exceptions.
 
         Log to console for debugging while also showing in UI.

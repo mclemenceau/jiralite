@@ -1,5 +1,7 @@
 """Add comment modal screen for JiraLite."""
 
+from typing import Any
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -47,7 +49,7 @@ class AddCommentModal(ModalScreen[str]):
     }
     """
 
-    def __init__(self, issue: Issue, **kwargs) -> None:
+    def __init__(self, issue: Issue, **kwargs: Any) -> None:
         """Initialize the add comment modal.
 
         Args:
@@ -83,7 +85,7 @@ class AddCommentModal(ModalScreen[str]):
         """Cancel adding comment."""
         self.dismiss(None)
 
-    def on_key(self, event) -> None:
+    def on_key(self, event: Any) -> None:
         """Handle keyboard shortcuts."""
         if event.key == "escape":
             self.dismiss(None)

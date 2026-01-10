@@ -2,7 +2,7 @@
 
 import base64
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 
@@ -50,7 +50,7 @@ class JiraClient:
         )
         return self
 
-    async def __aexit__(self, *args) -> None:
+    async def __aexit__(self, *args: Any) -> None:
         """Exit async context manager."""
         if self._client:
             await self._client.aclose()
@@ -95,6 +95,7 @@ class JiraClient:
             AuthenticationError: If authentication fails
             JiraAPIError: If the API call fails
         """
+        assert self._client is not None
         response = await self._client.get("/rest/api/3/myself")
 
         if response.status_code != 200:
@@ -145,8 +146,9 @@ class JiraClient:
             "maxResults": 100,
         }
 
+        assert self._client is not None
         response = await self._client.get(
-            "/rest/api/3/search/jql", params=params
+            "/rest/api/3/search/jql", params=params  # type: ignore[arg-type]
         )
 
         if response.status_code != 200:
@@ -173,6 +175,7 @@ class JiraClient:
             IssueNotFoundError: If issue doesn't exist
             JiraAPIError: If the API call fails
         """
+        assert self._client is not None
         response = await self._client.get(f"/rest/api/3/issue/{key}")
 
         if response.status_code != 200:
@@ -192,6 +195,7 @@ class JiraClient:
         Raises:
             JiraAPIError: If the API call fails
         """
+        assert self._client is not None
         response = await self._client.get(f"/rest/api/3/issue/{key}/comment")
 
         if response.status_code != 200:
@@ -232,6 +236,7 @@ class JiraClient:
 
         payload = {"body": adf_body}
 
+        assert self._client is not None
         response = await self._client.post(
             f"/rest/api/3/issue/{key}/comment", json=payload
         )
@@ -253,6 +258,7 @@ class JiraClient:
         Raises:
             JiraAPIError: If the API call fails
         """
+        assert self._client is not None
         response = await self._client.get(
             f"/rest/api/3/issue/{key}/transitions"
         )
@@ -287,7 +293,7 @@ class JiraClient:
         Raises:
             JiraAPIError: If the API call fails
         """
-        payload = {"transition": {"id": transition_id}}
+        payload: dict[str, Any] = {"transition": {"id": transition_id}}
 
         if comment:
             # Convert plain text to Atlassian Document Format (ADF)
@@ -301,8 +307,10 @@ class JiraClient:
                     }
                 ],
             }
+            # Ignore type mismatch for update field
             payload["update"] = {"comment": [{"add": {"body": adf_comment}}]}
 
+        assert self._client is not None
         response = await self._client.post(
             f"/rest/api/3/issue/{key}/transitions", json=payload
         )
@@ -382,9 +390,9 @@ class JiraClient:
             return None
 
         # Recursively extract text from ADF nodes
-        text_parts = []
+        text_parts: list[str] = []
 
-        def extract_node(node):
+        def extract_node(node: Any) -> None:
             """Recursively extract text from ADF node."""
             if isinstance(node, dict):
                 # Text nodes have a 'text' field

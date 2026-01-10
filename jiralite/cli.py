@@ -116,8 +116,11 @@ def build_jql_from_args(
     if args.project:
         return (
             f"project = {args.project} AND "
-            f'((assignee IN (currentUser()) AND statusCategory IN ("To Do","In Progress")) OR '
-            f"(assignee IN (currentUser()) AND statusCategory IN (Done) AND resolved >= -{default_days}d)) "
+            f'((assignee IN (currentUser()) AND '
+            f'statusCategory IN ("To Do","In Progress")) OR '
+            f"(assignee IN (currentUser()) AND "
+            f"statusCategory IN (Done) AND "
+            f"resolved >= -{default_days}d)) "
             f"ORDER BY updated DESC"
         )
 

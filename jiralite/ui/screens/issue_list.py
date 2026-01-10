@@ -4,7 +4,7 @@ import webbrowser
 
 from textual import on, work
 from textual.app import ComposeResult
-from textual.containers import Container, VerticalScroll
+from textual.containers import Container
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
@@ -293,7 +293,9 @@ class IssueListScreen(Screen):
         """
         try:
             async with JiraClient(self.config) as client:
-                await client.transition_issue(issue.key, transition_id, comment)
+                await client.transition_issue(
+                    issue.key, transition_id, comment
+                )
                 self.notify(f"Status changed for {issue.key}")
                 # Refresh to show updated status
                 self.load_issues()

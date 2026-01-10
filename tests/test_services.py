@@ -7,7 +7,6 @@ from httpx import Response
 from jiralite.domain.exceptions import (
     AuthenticationError,
     IssueNotFoundError,
-    JiraAPIError,
 )
 from jiralite.services import JiraClient, build_default_jql
 

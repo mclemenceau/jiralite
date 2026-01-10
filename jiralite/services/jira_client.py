@@ -461,13 +461,9 @@ class JiraClient:
 
         return Comment(
             id=data.get("id", ""),
-            author=author or User(
-                account_id="", display_name="Unknown"
-            ),
+            author=author or User(account_id="", display_name="Unknown"),
             body=self._extract_text_from_adf(data.get("body")) or "",
-            created=self._parse_datetime(
-                data.get("created")
-            ) or datetime.now(),
+            created=self._parse_datetime(data.get("created")) or datetime.now(),
             updated=self._parse_datetime(data.get("updated")),
         )
 
@@ -482,7 +478,7 @@ def build_default_jql(days: int = 14) -> str:
         JQL query string
     """
     return (
-        f'(assignee IN (currentUser()) AND '
+        f"(assignee IN (currentUser()) AND "
         f'statusCategory IN ("To Do","In Progress")) OR '
         f"(assignee IN (currentUser()) AND "
         f"statusCategory IN (Done) AND resolved >= -{days}d) "

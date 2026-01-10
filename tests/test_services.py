@@ -15,7 +15,7 @@ from jiralite.services import JiraClient, build_default_jql
 def test_build_default_jql():
     """Test default JQL builder."""
     jql = build_default_jql(14)
-    assert "assignee = currentUser()" in jql
+    assert "assignee IN (currentUser())" in jql
     assert "resolved >= -14d" in jql
     assert "ORDER BY updated DESC" in jql
 

@@ -58,7 +58,7 @@ def test_truncate_text_with_truncation():
 def test_format_issue_line_with_assignee(sample_issue):
     """Test formatting issue line with assignee shown."""
     line = format_issue_line(sample_issue, show_assignee=True)
-    assert "🐞" in line  # Bug icon
+    assert "🟥" in line  # Bug icon (red square)
     assert "ABC-123" in line
     assert "(John Doe)" in line
 
@@ -66,7 +66,7 @@ def test_format_issue_line_with_assignee(sample_issue):
 def test_format_issue_line_without_assignee(sample_issue):
     """Test formatting issue line without assignee shown."""
     line = format_issue_line(sample_issue, show_assignee=False)
-    assert "🐞" in line
+    assert "🟥" in line  # Bug icon (red square)
     assert "ABC-123" in line
     assert "(John Doe)" not in line
 

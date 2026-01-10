@@ -176,8 +176,28 @@ class JiraClient:
             IssueNotFoundError: If issue doesn't exist
             JiraAPIError: If the API call fails
         """
+        fields = [
+            "key",
+            "summary",
+            "issuetype",
+            "status",
+            "assignee",
+            "reporter",
+            "description",
+            "priority",
+            "labels",
+            "fixVersions",
+            "components",
+            "created",
+            "updated",
+        ]
+
+        params = {"fields": ",".join(fields)}
+
         assert self._client is not None
-        response = await self._client.get(f"/rest/api/3/issue/{key}")
+        response = await self._client.get(
+            f"/rest/api/3/issue/{key}", params=params  # type: ignore[arg-type]
+        )
 
         if response.status_code != 200:
             self._handle_error(response)

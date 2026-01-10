@@ -233,3 +233,114 @@ async def test_get_transitions(respx_mock, sample_config):
         assert transitions[2].id == "31"
         assert transitions[2].name == "Done"
         assert transitions[2].to_status == "Done"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_issue_with_adf_description(sample_config):
+    """Test getting an issue with ADF description."""
+    adf_description = {
+        "type": "doc",
+        "version": 1,
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {"type": "text", "text": "This is a test description"}
+                ],
+            }
+        ],
+    }
+
+    respx.get("https://example.atlassian.net/rest/api/3/issue/ABC-123").mock(
+        return_value=Response(
+            200,
+            json={
+                "key": "ABC-123",
+                "fields": {
+                    "summary": "Test issue",
+                    "issuetype": {"id": "1", "name": "Bug"},
+                    "status": {"name": "Open"},
+                    "description": adf_description,
+                    "labels": [],
+                    "fixVersions": [],
+                    "components": [],
+                },
+            },
+        )
+    )
+
+    async with JiraClient(sample_config) as client:
+        issue = await client.get_issue("ABC-123")
+        assert issue.description == "This is a test description"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_issue_with_empty_adf_description(sample_config):
+    """Test getting an issue with empty ADF description."""
+    adf_description = {"type": "doc", "version": 1, "content": []}
+
+    respx.get("https://example.atlassian.net/rest/api/3/issue/ABC-123").mock(
+        return_value=Response(
+            200,
+            json={
+                "key": "ABC-123",
+                "fields": {
+                    "summary": "Test issue",
+                    "issuetype": {"id": "1", "name": "Bug"},
+                    "status": {"name": "Open"},
+                    "description": adf_description,
+                    "labels": [],
+                    "fixVersions": [],
+                    "components": [],
+                },
+            },
+        )
+    )
+
+    async with JiraClient(sample_config) as client:
+        issue = await client.get_issue("ABC-123")
+        assert issue.description is None
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_issue_with_multiline_adf_description(sample_config):
+    """Test getting an issue with multi-paragraph ADF description."""
+    adf_description = {
+        "type": "doc",
+        "version": 1,
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": "First paragraph"}],
+            },
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": "Second paragraph"}],
+            },
+        ],
+    }
+
+    respx.get("https://example.atlassian.net/rest/api/3/issue/ABC-123").mock(
+        return_value=Response(
+            200,
+            json={
+                "key": "ABC-123",
+                "fields": {
+                    "summary": "Test issue",
+                    "issuetype": {"id": "1", "name": "Bug"},
+                    "status": {"name": "Open"},
+                    "description": adf_description,
+                    "labels": [],
+                    "fixVersions": [],
+                    "components": [],
+                },
+            },
+        )
+    )
+
+    async with JiraClient(sample_config) as client:
+        issue = await client.get_issue("ABC-123")
+        assert issue.description == "First paragraph\nSecond paragraph"

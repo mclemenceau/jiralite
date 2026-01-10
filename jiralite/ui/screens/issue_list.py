@@ -215,11 +215,25 @@ class IssueListScreen(Screen):
         return None
 
     @on(ListView.Selected)
-    def show_issue_detail(self, event: ListView.Selected) -> None:
+    async def show_issue_detail(self, event: ListView.Selected) -> None:
         """Show issue detail modal when item is selected."""
         if isinstance(event.item, IssueListItem):
-            modal = IssueDetailModal(event.item.issue, self.config.base_url)
-            self.app.push_screen(modal)
+            # Fetch full issue details including description
+            try:
+                self.app.notify("Loading issue details...", timeout=2)
+                async with JiraClient(self.config) as client:
+                    full_issue = await client.get_issue(event.item.issue.key)
+                    logger.info(
+                        f"Loaded {full_issue.key}, "
+                        f"description: {len(full_issue.description or '')} "
+                        f"chars"
+                    )
+                    modal = IssueDetailModal(full_issue, self.config.base_url)
+                    self.app.push_screen(modal)
+            except Exception as e:
+                error_msg = f"Failed to load issue: {e}"
+                logger.exception(error_msg)
+                self.show_error(error_msg)
 
     def action_quit(self) -> None:
         """Quit the application."""

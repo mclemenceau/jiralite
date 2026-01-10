@@ -103,7 +103,6 @@ When displayed, the assignee appears at the end of the line.
 
 Example visual layouts:
 
-- � ABC-123 Fix crash when parsing empty config files
 - 🟩 ABC-128 Add support for multi-project search (John D.)
 - 🟦 ABC-131 Update README with authentication examples (Alice M.)
 
@@ -289,12 +288,12 @@ The issue modal uses a split layout optimized for readability.
 - Issue details modal (read-only)
 - Add comment
 - Help modal
+- History modal (comments and changelog)
+- Status transition with mandatory comment
 
 ### v0.2
 
 - Edit summary and description
-- Status transition with mandatory comment
-- History modal
 
 ### v0.3
 

@@ -13,6 +13,7 @@ from jiralite.domain.exceptions import (
     JiraAPIError,
 )
 from jiralite.domain.models import (
+    ChangelogEntry,
     Comment,
     Issue,
     IssueType,
@@ -279,6 +280,50 @@ class JiraClient:
             )
 
         return transitions
+
+    async def get_changelog(self, key: str) -> list["ChangelogEntry"]:
+        """Get changelog for an issue.
+
+        Args:
+            key: Issue key
+
+        Returns:
+            List of ChangelogEntry instances
+
+        Raises:
+            JiraAPIError: If the API call fails
+        """
+        assert self._client is not None
+        response = await self._client.get(
+            f"/rest/api/3/issue/{key}?expand=changelog"
+        )
+
+        if response.status_code != 200:
+            self._handle_error(response)
+
+        data = response.json()
+        changelog_entries = []
+
+        changelog = data.get("changelog", {})
+        histories = changelog.get("histories", [])
+
+        for history in histories:
+            author = self._parse_user(history.get("author"))
+            created = self._parse_datetime(history.get("created"))
+
+            for item in history.get("items", []):
+                changelog_entries.append(
+                    ChangelogEntry(
+                        timestamp=created or datetime.now(),
+                        author=author
+                        or User(account_id="", display_name="Unknown"),
+                        field=item.get("field", ""),
+                        from_value=item.get("fromString"),
+                        to_value=item.get("toString"),
+                    )
+                )
+
+        return changelog_entries
 
     async def transition_issue(
         self, key: str, transition_id: str, comment: Optional[str] = None

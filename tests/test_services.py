@@ -136,3 +136,100 @@ async def test_add_comment(sample_config):
         comment = await client.add_comment("ABC-123", "Test comment")
         assert comment.id == "456"
         assert comment.body == "Test comment"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_changelog(sample_config):
+    """Test getting changelog for an issue."""
+    respx.get(
+        "https://example.atlassian.net/rest/api/3/issue/"
+        "ABC-123?expand=changelog"
+    ).mock(
+        return_value=Response(
+            200,
+            json={
+                "key": "ABC-123",
+                "changelog": {
+                    "histories": [
+                        {
+                            "author": {
+                                "accountId": "123",
+                                "displayName": "John Doe",
+                            },
+                            "created": "2024-01-10T12:00:00.000+0000",
+                            "items": [
+                                {
+                                    "field": "status",
+                                    "fromString": "Open",
+                                    "toString": "In Progress",
+                                }
+                            ],
+                        },
+                        {
+                            "author": {
+                                "accountId": "456",
+                                "displayName": "Jane Smith",
+                            },
+                            "created": "2024-01-11T14:30:00.000+0000",
+                            "items": [
+                                {
+                                    "field": "priority",
+                                    "fromString": "Medium",
+                                    "toString": "High",
+                                }
+                            ],
+                        },
+                    ]
+                },
+            },
+        )
+    )
+
+    async with JiraClient(sample_config) as client:
+        changelog = await client.get_changelog("ABC-123")
+        assert len(changelog) == 2
+        assert changelog[0].field == "status"
+        assert changelog[0].from_value == "Open"
+        assert changelog[0].to_value == "In Progress"
+        assert changelog[0].author.display_name == "John Doe"
+        assert changelog[1].field == "priority"
+        assert changelog[1].from_value == "Medium"
+        assert changelog[1].to_value == "High"
+        assert changelog[1].author.display_name == "Jane Smith"
+
+
+@pytest.mark.asyncio
+async def test_get_transitions(respx_mock, sample_config):
+    """Test getting available transitions for an issue."""
+    respx_mock.get(
+        "https://example.atlassian.net/rest/api/3/issue/ABC-123/transitions"
+    ).mock(
+        return_value=Response(
+            200,
+            json={
+                "transitions": [
+                    {"id": "11", "name": "To Do", "to": {"name": "To Do"}},
+                    {
+                        "id": "21",
+                        "name": "In Progress",
+                        "to": {"name": "In Progress"},
+                    },
+                    {"id": "31", "name": "Done", "to": {"name": "Done"}},
+                ]
+            },
+        )
+    )
+
+    async with JiraClient(sample_config) as client:
+        transitions = await client.get_transitions("ABC-123")
+        assert len(transitions) == 3
+        assert transitions[0].id == "11"
+        assert transitions[0].name == "To Do"
+        assert transitions[0].to_status == "To Do"
+        assert transitions[1].id == "21"
+        assert transitions[1].name == "In Progress"
+        assert transitions[1].to_status == "In Progress"
+        assert transitions[2].id == "31"
+        assert transitions[2].name == "Done"
+        assert transitions[2].to_status == "Done"

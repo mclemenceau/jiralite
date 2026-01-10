@@ -64,3 +64,14 @@ class Transition:
     id: str
     name: str
     to_status: str
+
+
+@dataclass(frozen=True, slots=True)
+class ChangelogEntry:
+    """Represents a Jira changelog entry."""
+
+    timestamp: datetime
+    author: User
+    field: str
+    from_value: Optional[str] = None
+    to_value: Optional[str] = None

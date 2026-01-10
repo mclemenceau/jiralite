@@ -1,6 +1,7 @@
 """Domain models and types for JiraLite."""
 
 from jiralite.domain.models import (
+    ChangelogEntry,
     Comment,
     Issue,
     IssueType,
@@ -9,6 +10,7 @@ from jiralite.domain.models import (
 )
 
 __all__ = [
+    "ChangelogEntry",
     "Comment",
     "Issue",
     "IssueType",

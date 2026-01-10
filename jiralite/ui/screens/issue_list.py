@@ -15,6 +15,7 @@ from jiralite.services import JiraClient
 from jiralite.ui.modals import (
     AddCommentModal,
     HelpModal,
+    HistoryModal,
     IssueDetailModal,
     TransitionModal,
 )
@@ -321,8 +322,29 @@ class IssueListScreen(Screen):
             self.notify(f"Error: {error_msg}", severity="error")
 
     def action_show_history(self) -> None:
-        """Show issue history (placeholder for v0.2)."""
-        self.notify("History view coming in v0.2")
+        """Show issue history modal."""
+        issue = self.get_selected_issue()
+        if issue:
+            self.load_and_show_history(issue)
+
+    @work(exclusive=True)
+    async def load_and_show_history(self, issue: Issue) -> None:
+        """Load and display issue history.
+
+        Args:
+            issue: Issue to show history for
+        """
+        try:
+            async with JiraClient(self.config) as client:
+                comments = await client.get_comments(issue.key)
+                changelog = await client.get_changelog(issue.key)
+
+            modal = HistoryModal(issue.key, comments, changelog)
+            self.app.push_screen(modal)
+        except Exception as e:
+            error_msg = f"{type(e).__name__}: {e}"
+            logger.exception(f"Failed to load history: {error_msg}")
+            self.notify(f"Error: {error_msg}", severity="error")
 
     def action_open_browser(self) -> None:
         """Open selected issue in web browser."""

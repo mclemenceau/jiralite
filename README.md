@@ -114,7 +114,7 @@ jiralite --version
 - **e** — Edit summary and description (coming in v0.2)
 - **c** — Add comment
 - **s** — Change status (coming in v0.2)
-- **h** — View issue history (coming in v0.2)
+- **h** — View issue history (comments and changelog)
 - **o** — Open issue in web browser
 - **r** — Refresh issue list
 
@@ -201,7 +201,6 @@ jiralite/
 ### v0.2 (Planned)
 - Edit summary and description
 - Status transition with mandatory comment
-- History modal (comments and changelog)
 
 ### v0.3 (Planned)
 - Caching improvements

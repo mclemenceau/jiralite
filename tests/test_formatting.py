@@ -83,3 +83,20 @@ def test_format_issue_line_truncates_summary():
     line = format_issue_line(issue, show_assignee=False, max_width=80)
     assert len(line) <= 80
     assert "…" in line
+
+
+def test_format_issue_line_very_small_width():
+    """Test formatting with very small max_width."""
+    user = User(account_id="123", display_name="Very Long Name")
+    issue_type = IssueType(id="1", name="Bug")
+    issue = Issue(
+        key="ABC-123",
+        summary="Test summary",
+        issue_type=issue_type,
+        status="Open",
+        assignee=user,
+    )
+    # Small width that leaves no room for summary
+    line = format_issue_line(issue, show_assignee=True, max_width=20)
+    assert "🟥" in line
+    assert "ABC-123" in line

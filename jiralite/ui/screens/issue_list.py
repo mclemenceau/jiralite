@@ -309,7 +309,10 @@ class IssueListScreen(Screen):
         """
         try:
             async with JiraClient(self.config) as client:
-                await client.transition_issue(issue.key, transition_id, comment)
+                # First add the comment
+                await client.add_comment(issue.key, comment)
+                # Then perform the transition
+                await client.transition_issue(issue.key, transition_id)
                 self.notify(f"Status changed for {issue.key}")
                 # Refresh to show updated status
                 self.load_issues()

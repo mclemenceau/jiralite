@@ -345,35 +345,17 @@ class JiraClient:
 
         return changelog_entries
 
-    async def transition_issue(
-        self, key: str, transition_id: str, comment: Optional[str] = None
-    ) -> None:
+    async def transition_issue(self, key: str, transition_id: str) -> None:
         """Perform a status transition on an issue.
 
         Args:
             key: Issue key
             transition_id: Transition ID
-            comment: Optional comment to add
 
         Raises:
             JiraAPIError: If the API call fails
         """
         payload: dict[str, Any] = {"transition": {"id": transition_id}}
-
-        if comment:
-            # Convert plain text to Atlassian Document Format (ADF)
-            adf_comment = {
-                "type": "doc",
-                "version": 1,
-                "content": [
-                    {
-                        "type": "paragraph",
-                        "content": [{"type": "text", "text": comment}],
-                    }
-                ],
-            }
-            # Ignore type mismatch for update field
-            payload["update"] = {"comment": [{"add": {"body": adf_comment}}]}
 
         assert self._client is not None
         response = await self._client.post(

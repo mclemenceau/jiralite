@@ -108,6 +108,13 @@ class TransitionModal(ModalScreen[tuple[str, str] | None]):
                 yield Button("Submit", id="submit", variant="primary")
                 yield Button("Cancel", id="cancel")
 
+    def on_mount(self) -> None:
+        """Handle modal mount - select first transition by default."""
+        if self.transitions:
+            # Set ListView index to 0 to show visual selection
+            list_view = self.query_one("#transition_list", ListView)
+            list_view.index = 0
+
     @on(ListView.Selected, "#transition_list")
     def transition_selected(self, event: ListView.Selected) -> None:
         """Handle transition selection."""
@@ -117,18 +124,26 @@ class TransitionModal(ModalScreen[tuple[str, str] | None]):
     @on(Button.Pressed, "#submit")
     def submit_transition(self) -> None:
         """Submit the transition."""
-        if not self.selected_transition:
-            # No transition selected, cannot proceed
+        # Get the currently highlighted transition from ListView
+        list_view = self.query_one("#transition_list", ListView)
+        if list_view.highlighted_child is None:
+            # No transition highlighted, cannot proceed
             return
 
+        if not isinstance(list_view.highlighted_child, TransitionListItem):
+            return
+
+        selected = list_view.highlighted_child.transition
+
         text_area = self.query_one("#comment_text", TextArea)
-        comment_text = text_area.text.strip()
+        # Ensure we get the current document text properly
+        comment_text = str(text_area.document.text).strip()
 
         if not comment_text:
             # Comment is mandatory, cannot proceed
             return
 
-        self.dismiss((self.selected_transition.id, comment_text))
+        self.dismiss((selected.id, comment_text))
 
     @on(Button.Pressed, "#cancel")
     def cancel_transition(self) -> None:

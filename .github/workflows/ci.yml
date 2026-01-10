@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run Black (formatting check)
+        run: black --check jiralite tests
+
+      - name: Run isort (import order check)
+        run: isort --check jiralite tests
+
+      - name: Run flake8 (linting)
+        run: flake8 jiralite tests
+
+      - name: Run mypy (type checking)
+        run: mypy jiralite
+
+      - name: Run tests with coverage
+        run: python -m pytest tests/ -v --cov=jiralite --cov-report=term-missing
+
+      - name: Check test coverage threshold
+        run: |
+          coverage report --fail-under=28

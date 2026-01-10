@@ -19,31 +19,35 @@ class HistoryModal(ModalScreen):
         align: center middle;
     }
 
-    HistoryModal > Container {
+    #history-container {
         width: 90%;
         height: 90%;
         background: $surface;
         border: thick $primary;
-        padding: 1;
     }
 
-    .history-header {
+    #history-header {
         width: 100%;
         height: auto;
         padding: 1;
         background: $boost;
-        text-align: center;
+        border-bottom: solid $primary;
     }
 
-    .history-scroll {
+    #history-content {
         width: 100%;
         height: 1fr;
+    }
+
+    #history-scroll {
+        width: 100%;
+        height: 100%;
         padding: 1;
-        margin-top: 1;
     }
 
     .history-entry {
         width: 100%;
+        height: auto;
         margin-bottom: 2;
         padding: 1;
         background: $panel;
@@ -51,23 +55,27 @@ class HistoryModal(ModalScreen):
     }
 
     .history-meta {
+        width: 100%;
+        height: auto;
         color: $text-muted;
         text-style: italic;
         margin-bottom: 1;
     }
 
-    .changelog-item {
-        width: 100%;
-        margin-bottom: 1;
-        padding: 1;
-        background: $surface;
-    }
-
-    .button-bar {
+    .history-content {
         width: 100%;
         height: auto;
+        color: $text;
+    }
+
+    #button-bar {
+        width: 100%;
+        height: auto;
+        dock: bottom;
+        background: $boost;
+        padding: 0 1;
+        border-top: solid $primary;
         align: center middle;
-        padding: 1;
     }
     """
 
@@ -93,27 +101,63 @@ class HistoryModal(ModalScreen):
 
     def compose(self) -> ComposeResult:
         """Compose the history layout."""
-        with Container():
+        with Container(id="history-container"):
             # Header
-            with Container(classes="history-header"):
+            with Container(id="history-header"):
                 yield Label(f"History for {self.issue_key}")
 
-            # Scrollable content area
-            with VerticalScroll(classes="history-scroll"):
-                # Merge and sort comments and changelog by timestamp
-                all_entries = self._merge_history()
+            # Content wrapper
+            with Container(id="history-content"):
+                # Scrollable content area
+                with VerticalScroll(id="history-scroll"):
+                    # Merge and sort comments and changelog by timestamp
+                    all_entries = self._merge_history()
 
-                if not all_entries:
-                    yield Static("No history available")
-                else:
-                    for entry in all_entries:
-                        if isinstance(entry, Comment):
-                            yield from self._render_comment(entry)
-                        else:
-                            yield from self._render_changelog(entry)
+                    if not all_entries:
+                        yield Static("No history available")
+                    else:
+                        for entry in all_entries:
+                            if isinstance(entry, Comment):
+                                # Render comment
+                                with Container(classes="history-entry"):
+                                    timestamp = entry.created.strftime(
+                                        "%Y-%m-%d %H:%M:%S"
+                                    )
+                                    meta = (
+                                        f"💬 {entry.author.display_name} "
+                                        f"· {timestamp}"
+                                    )
+                                    yield Label(meta, classes="history-meta")
+                                    yield Static(
+                                        entry.body,
+                                        classes="history-content",
+                                        markup=False,
+                                    )
+                            else:
+                                # Render changelog entry
+                                with Container(classes="history-entry"):
+                                    timestamp = entry.timestamp.strftime(
+                                        "%Y-%m-%d %H:%M:%S"
+                                    )
+                                    meta = (
+                                        f"📝 {entry.author.display_name} "
+                                        f"· {timestamp}"
+                                    )
+                                    yield Label(meta, classes="history-meta")
+
+                                    from_val = entry.from_value or "(empty)"
+                                    to_val = entry.to_value or "(empty)"
+                                    change_text = (
+                                        f"{entry.field}: {from_val} → {to_val}"
+                                    )
+                                    yield Static(
+                                        change_text,
+                                        classes="history-content",
+                                        markup=False,
+                                    )
 
             # Button bar
-            with Container(classes="button-bar"):
+            with Container(id="button-bar"):
                 yield Button("Close (Esc)", id="close", variant="primary")
 
     def _merge_history(
@@ -122,54 +166,21 @@ class HistoryModal(ModalScreen):
         """Merge and sort comments and changelog by timestamp.
 
         Returns:
-            Sorted list of comments and changelog entries
+            Sorted list of comments and changelog entries (most recent first)
         """
         all_entries: list[Comment | ChangelogEntry] = []
         all_entries.extend(self.comments)
         all_entries.extend(self.changelog)
 
-        # Sort by timestamp (most recent last)
+        # Sort by timestamp (most recent first)
         all_entries.sort(
             key=lambda e: (
                 e.timestamp if isinstance(e, ChangelogEntry) else e.created
-            )
+            ),
+            reverse=True,
         )
 
         return all_entries
-
-    def _render_comment(self, comment: Comment) -> ComposeResult:
-        """Render a comment entry.
-
-        Args:
-            comment: Comment to render
-
-        Yields:
-            Textual widgets for the comment
-        """
-        with Container(classes="history-entry"):
-            timestamp = comment.created.strftime("%Y-%m-%d %H:%M:%S")
-            meta = f"💬 {comment.author.display_name} · {timestamp}"
-            yield Label(meta, classes="history-meta")
-            yield Static(comment.body)
-
-    def _render_changelog(self, entry: ChangelogEntry) -> ComposeResult:
-        """Render a changelog entry.
-
-        Args:
-            entry: Changelog entry to render
-
-        Yields:
-            Textual widgets for the changelog entry
-        """
-        with Container(classes="changelog-item"):
-            timestamp = entry.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            meta = f"📝 {entry.author.display_name} · {timestamp}"
-            yield Label(meta, classes="history-meta")
-
-            from_val = entry.from_value or "(empty)"
-            to_val = entry.to_value or "(empty)"
-            change_text = f"{entry.field}: {from_val} → {to_val}"
-            yield Static(change_text)
 
     @on(Button.Pressed, "#close")
     def close_modal(self) -> None:

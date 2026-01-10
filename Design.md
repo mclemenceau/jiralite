@@ -103,22 +103,21 @@ When displayed, the assignee appears at the end of the line.
 
 Example visual layouts:
 
-- 🐞 ABC-123 Fix crash when parsing empty config files
-- ✨ ABC-128 Add support for multi-project search (John D.)
-- 📖 ABC-131 Update README with authentication examples (Alice M.)
+- � ABC-123 Fix crash when parsing empty config files
+- 🟩 ABC-128 Add support for multi-project search (John D.)
+- 🟦 ABC-131 Update README with authentication examples (Alice M.)
 
 ### Default issue type icons
 
-The icon mapping is configurable. Default mappings:
+The icon mapping uses colored squares for visual clarity. Default mappings:
 
-- Bug → 🐞
-- Story → ✨
-- Task → 🛠️
-- Epic → 🧩
-- Improvement → 🚀
-- Sub-task → ↳
-- Documentation → 📖
-- Unknown or custom → ❓
+- Objective → 🟨
+- Epic → 🟪
+- Bug → 🟥
+- Task → 🟦
+- Story → 🟩
+- Sub-task → ⬜
+- Unknown or custom → ⬛
 
 Icons are intentionally simple Unicode characters to avoid font compatibility  
 issues.

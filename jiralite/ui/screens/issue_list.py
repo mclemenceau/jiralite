@@ -27,23 +27,33 @@ logger = get_logger("ui.issue_list")
 class IssueListItem(ListItem):
     """Custom list item for displaying an issue."""
 
-    def __init__(self, issue: Issue, show_assignee: bool = True) -> None:
+    def __init__(
+        self,
+        issue: Issue,
+        show_assignee: bool = True,
+        additional_fields: Optional[list[str]] = None,
+    ) -> None:
         """Initialize issue list item.
 
         Args:
             issue: Issue to display
             show_assignee: Whether to show assignee
+            additional_fields: Additional fields to display
         """
         super().__init__()
         self.issue = issue
         self.show_assignee = show_assignee
+        self.additional_fields = additional_fields or []
         self._label: Label | None = None
 
     def compose(self) -> ComposeResult:
         """Compose the list item."""
         # Start with 80 columns, will update on mount
         line = format_issue_line(
-            self.issue, show_assignee=self.show_assignee, max_width=80
+            self.issue,
+            show_assignee=self.show_assignee,
+            max_width=80,
+            additional_fields=self.additional_fields,
         )
         self._label = Label(line)
         yield self._label
@@ -56,6 +66,7 @@ class IssueListItem(ListItem):
                 self.issue,
                 show_assignee=self.show_assignee,
                 max_width=max_width,
+                additional_fields=self.additional_fields,
             )
             self._label.update(line)
 
@@ -169,7 +180,8 @@ class IssueListScreen(Screen):
 
         # Determine if we should show assignee
         # Hide assignee if all issues are assigned to current user
-        show_assignee = any(
+        # Also check if assignee is in additional_fields
+        show_assignee = "assignee" not in self.additional_fields and any(
             issue.assignee is None
             or issue.assignee.account_id != self.current_user_id
             for issue in self.issues
@@ -181,7 +193,13 @@ class IssueListScreen(Screen):
 
         # Then populate it with items
         for issue in self.issues:
-            list_view.append(IssueListItem(issue, show_assignee=show_assignee))
+            list_view.append(
+                IssueListItem(
+                    issue,
+                    show_assignee=show_assignee,
+                    additional_fields=self.additional_fields,
+                )
+            )
 
         list_view.focus()
 

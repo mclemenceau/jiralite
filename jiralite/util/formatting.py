@@ -29,7 +29,10 @@ def get_issue_icon(issue_type_name: str) -> str:
 
 
 def format_issue_line(
-    issue: Issue, show_assignee: bool = True, max_width: int = 80
+    issue: Issue,
+    show_assignee: bool = True,
+    max_width: int = 80,
+    additional_fields: Optional[list[str]] = None,
 ) -> str:
     """Format an issue for display in the list view.
 
@@ -37,44 +40,64 @@ def format_issue_line(
         issue: Issue to format
         show_assignee: Whether to show assignee
         max_width: Maximum line width
+        additional_fields: Additional fields to display
 
     Returns:
         Formatted issue line
     """
     icon = get_issue_icon(issue.issue_type.name)
+    fields = additional_fields or []
 
     # Fixed column widths for alignment
     key_width = 12
-    status_width = 15
 
-    # Format key and status with padding
+    # Format key with padding
     key_col = f"{issue.key:<{key_width}}"
-    status_col = f"{issue.status:<{status_width}}"
+
+    # Build additional field columns
+    field_parts = []
+
+    # Always include status unless explicitly excluded
+    if "status" not in fields:
+        fields = ["status"] + fields
+
+    for field_name in fields:
+        field_value = _get_field_value(issue, field_name)
+        if field_value:
+            field_parts.append(field_value)
 
     # Build assignee text
     assignee_text = ""
-    if show_assignee and issue.assignee:
+    if show_assignee and "assignee" not in fields and issue.assignee:
         assignee_text = f" ({issue.assignee.display_name})"
 
+    # Join field parts with spacing
+    fields_text = " ".join(field_parts) if field_parts else ""
+
     # Calculate available space for summary
-    # icon + space + key_col + space + status_col + space + summary + assignee
-    # 2 (icon + space) + key_width + 1 (space) + status_width + 1 (space)
-    prefix_len = 2 + key_width + 1 + status_width + 1
+    # icon + space + key_col + space + fields + space + summary + assignee
+    prefix_len = 2 + key_width + 1
+    if fields_text:
+        prefix_len += len(fields_text) + 1
+
     available = max_width - prefix_len - len(assignee_text)
 
     if available <= 0:
-        return f"{icon} {key_col} {status_col}".strip()
+        base = f"{icon} {key_col}"
+        if fields_text:
+            base += f" {fields_text}"
+        return base.strip()
 
     # Truncate summary if needed
     summary = issue.summary
     if len(summary) > available:
         summary = summary[: available - 1] + "…"
 
-    return f"{icon} {key_col} {status_col} {summary}{assignee_text}"
-    if len(summary) > available:
-        summary = summary[: available - 1] + "…"
-
-    return f"{icon} {key_col}{status_col}{summary}{assignee_text}"
+    result = f"{icon} {key_col}"
+    if fields_text:
+        result += f" {fields_text}"
+    result += f" {summary}{assignee_text}"
+    return result
 
 
 def truncate_text(text: str, max_length: int) -> str:
@@ -90,6 +113,46 @@ def truncate_text(text: str, max_length: int) -> str:
     if len(text) <= max_length:
         return text
     return text[: max_length - 1] + "…"
+
+
+def _get_field_value(issue: Issue, field_name: str) -> str:
+    """Get formatted value for a field.
+
+    Args:
+        issue: Issue instance
+        field_name: Name of the field to retrieve
+
+    Returns:
+        Formatted field value or empty string
+    """
+    field_map = {
+        "status": lambda: issue.status[:15],
+        "priority": lambda: issue.priority[:10] if issue.priority else "",
+        "assignee": lambda: (
+            issue.assignee.display_name[:15] if issue.assignee else "Unassigned"
+        ),
+        "reporter": lambda: (
+            issue.reporter.display_name[:15] if issue.reporter else ""
+        ),
+        "labels": lambda: (",".join(issue.labels)[:20] if issue.labels else ""),
+        "fix_versions": lambda: (
+            ",".join(issue.fix_versions)[:20] if issue.fix_versions else ""
+        ),
+        "components": lambda: (
+            ",".join(issue.components)[:20] if issue.components else ""
+        ),
+        "created": lambda: (
+            issue.created.strftime("%Y-%m-%d") if issue.created else ""
+        ),
+        "updated": lambda: (
+            issue.updated.strftime("%Y-%m-%d") if issue.updated else ""
+        ),
+    }
+
+    getter = field_map.get(field_name)
+    if getter:
+        return getter()
+    return ""
 
 
 def format_assignee(assignee: Optional[User]) -> str:

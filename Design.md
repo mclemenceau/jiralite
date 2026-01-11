@@ -123,23 +123,41 @@ issues.
 
 ### Extensible list fields
 
-The list view is designed to be extensible.
+The list view is designed to be extensible via the `--fields` parameter.
 
 - Additional fields can be enabled via command-line arguments
-- Field order is explicit and deterministic
-- Fields must gracefully truncate to preserve the 80-column layout
-- Unknown or unsupported fields are ignored with a user-visible warning
+- Status is always displayed unless explicitly overridden
+- Fields are displayed in the order specified
+- Fields are truncated to preserve the 80-column layout
+- Unknown or unsupported fields are silently ignored
 
-Examples of fields that may be enabled:
+**Usage:**
+```bash
+jiralite --fields priority,labels
+jiralite --fields assignee,reporter,updated
+```
 
-- status
-- priority
-- fixVersions
-- labels
-- updated
-- reporter
+**Supported fields:**
+- `status` (default, always shown)
+- `priority`
+- `assignee`
+- `reporter`
+- `labels`
+- `fix_versions`
+- `components`
+- `created`
+- `updated`
 
-The default view remains minimal to preserve readability and performance.
+**Display format:**
+Each field is truncated to a maximum width to ensure readability:
+- status: 15 characters
+- priority: 10 characters
+- assignee/reporter: 15 characters
+- labels/fix_versions/components: 20 characters (comma-separated)
+- dates: YYYY-MM-DD format
+
+The default view shows only icon, key, status, and summary to preserve 
+readability and performance.
 
 ### Key bindings
 

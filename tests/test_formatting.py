@@ -100,3 +100,38 @@ def test_format_issue_line_very_small_width():
     line = format_issue_line(issue, show_assignee=True, max_width=20)
     assert "🟥" in line
     assert "ABC-123" in line
+
+
+def test_format_issue_line_with_additional_fields(sample_issue):
+    """Test formatting issue line with additional fields."""
+    line = format_issue_line(
+        sample_issue, show_assignee=False, additional_fields=["priority"]
+    )
+    assert "🟥" in line  # Bug icon
+    assert "ABC-123" in line
+    assert "High" in line  # Priority field
+
+
+def test_format_issue_line_with_multiple_additional_fields():
+    """Test formatting with multiple additional fields."""
+    user = User(account_id="123", display_name="John Doe")
+    issue_type = IssueType(id="1", name="Story")
+    issue = Issue(
+        key="XYZ-456",
+        summary="Add new feature",
+        issue_type=issue_type,
+        status="In Progress",
+        assignee=user,
+        priority="Medium",
+        labels=("backend", "api"),
+    )
+    line = format_issue_line(
+        issue,
+        show_assignee=False,
+        additional_fields=["priority", "labels"],
+    )
+    assert "🟩" in line  # Story icon
+    assert "XYZ-456" in line
+    assert "In Progress" in line
+    assert "Medium" in line
+    assert "backend" in line or "api" in line

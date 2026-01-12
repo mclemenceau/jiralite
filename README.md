@@ -33,7 +33,7 @@ JiraLite is a terminal user interface (TUI) for Jira that provides:
 ### Install from source
 
 ```bash
-git clone https://github.com/yourusername/jiralite.git
+git clone https://github.com/mclemenceau/jiralite.git
 cd jiralite
 
 # Create and activate virtual environment

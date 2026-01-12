@@ -225,7 +225,7 @@ MIT License - see LICENSE file for details
 ## Support
 
 For issues, questions, or contributions:
-- GitHub Issues: https://github.com/yourusername/jiralite/issues
+- GitHub Issues: https://github.com/mclemenceau/jiralite/issues
 - Documentation: See `Design.md` and `Agent.md`
 
 ## Credits
